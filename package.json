@@ -1,0 +1,17 @@
+{
+  "name": "pontesyfabrica",
+  "version": "1.1.0",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check ponte.js && node --check mcp.js && node --check seguranca.js && node --check util.js && node --check requisicao.js",
+    "test": "node teste.mjs"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

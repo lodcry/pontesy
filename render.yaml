@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: pontesyfabrica
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install --omit=dev
+    startCommand: node server.js
+    healthCheckPath: /saude
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: SYNAPSE_TOKEN
+        sync: false
+      - key: PONTE_TIMEOUT_MS
+        value: "75000"
