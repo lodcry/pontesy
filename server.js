@@ -3,6 +3,7 @@
 import http from 'node:http';
 import { criarPonte } from './ponte.js';
 import { criarMcp } from './mcp.js';
+import { criarTunel } from './tunel.js';
 import { corsHeaders, tokenConfigurado } from './seguranca.js';
 import { normalizar } from './requisicao.js';
 import { responderJson } from './util.js';
@@ -17,6 +18,7 @@ if (!tokenConfigurado()) {
 
 const ponte = criarPonte();
 const mcp = criarMcp(ponte);
+const tunel = criarTunel();
 
 const servidor = http.createServer(async (req, res) => {
   const { pathname } = normalizar(req);
@@ -27,9 +29,11 @@ const servidor = http.createServer(async (req, res) => {
   try {
     if (pathname === '/saude' && (req.method === 'GET' || req.method === 'HEAD')) {
       return responderJson(res, {
-        status: 'ok', servico: 'pontesyfabrica', fabrica: ponte.estado(), uptime_s: Math.round(process.uptime()),
+        status: 'ok', servico: 'pontesyfabrica', fabrica: ponte.estado(), tunel: tunel.estado(), uptime_s: Math.round(process.uptime()),
       }, 200, headers);
     }
+
+    if ((req.method === 'GET' || req.method === 'HEAD') && pathname.startsWith('/p/')) return await tunel.atender(req, res, pathname, headers);
 
     if (req.method === 'POST') return await mcp.atender(req, res);
 
@@ -47,6 +51,11 @@ const servidor = http.createServer(async (req, res) => {
 });
 
 ponte.instalar(servidor);
+tunel.instalar(servidor);
+servidor.on('upgrade', (req, sock) => {
+  const p = new URL(req.url, 'http://localhost').pathname;
+  if (p !== '/ponte' && p !== '/tunel') sock.destroy();
+});
 servidor.keepAliveTimeout = 65000;
 servidor.headersTimeout = 66000;
 

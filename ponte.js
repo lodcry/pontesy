@@ -104,7 +104,7 @@ export function criarPonte() {
 
     servidorHttp.on('upgrade', (req, sock, head) => {
       const url = new URL(req.url, 'http://localhost');
-      if (url.pathname !== '/ponte') { sock.destroy(); return; }
+      if (url.pathname !== '/ponte') return;
       if (excedeuFalhas(req)) { sock.write('HTTP/1.1 429 Too Many Requests\r\n\r\n'); sock.destroy(); return; }
       const auth = String(req.headers.authorization || '');
       const doCabecalho = auth.startsWith('Bearer ') ? auth.slice(7).trim() : '';
